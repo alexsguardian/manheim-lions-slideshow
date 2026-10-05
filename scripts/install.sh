@@ -275,6 +275,9 @@ deploy_project() {
         # Clone repository
         sudo git clone "$REPO_URL" "$PROJECT_DIR"
 
+        # The clone is root-owned; the build runs as the service user, so hand it over first
+        sudo chown -R "$SERVICE_USER:$SERVICE_USER" "$PROJECT_DIR"
+
         log "System architecture: $(uname -m)"
         log "Node.js version: $(node --version)"
         log "npm version: $(npm --version)"
@@ -587,7 +590,7 @@ sudo systemctl stop slideshow-display.service
 sudo -u $SERVICE_USER git pull origin main
 
 # Install dependencies and rebuild
-sudo -u $SERVICE_USER npm ci --only=production
+sudo -u $SERVICE_USER npm ci
 sudo -u $SERVICE_USER npm run build
 
 # Restart services
