@@ -60,6 +60,7 @@ The cloud-init style installer performs the following:
 ### Management Tools
 - ✅ Creates update script (`slideshow-update`)
 - ✅ Creates status monitoring script (`slideshow-status`)
+- ✅ Installs `kiosk-switch` for switching between the menu and the slideshow
 - ✅ Configures proper logging and error handling
 
 ## 🛠️ Post-Installation Management
@@ -77,6 +78,28 @@ This will:
 - Rebuild the application
 - Restart all services
 - Apply changes immediately
+
+### Switching Between the Menu and the Slideshow
+
+The digital menu ([manheim-lions-digimenu](https://github.com/alexsguardian/manheim-lions-digimenu)) and this slideshow can be installed on the same Pi. Switch what the TV shows with:
+
+```bash
+kiosk-switch menu        # show the food stand menu
+kiosk-switch slideshow   # show the community slideshow
+kiosk-switch toggle      # switch to whichever one isn't showing
+kiosk-switch status      # show what's on screen and what's installed
+```
+
+Each app keeps its own nginx site; `kiosk-switch` enables one at a time and restarts the kiosk browser (the screen is blank for about 20 seconds while it reloads). The `slideshow-display` service runs the kiosk for both apps, so the menu's own `menu-display` service is masked.
+
+**Install order:** install the digimenu first (if you want it), then this slideshow. The slideshow installer sets up the shared kiosk and disables the menu's kiosk service. Re-running the digimenu installer afterwards puts its own kiosk back in charge; re-run this installer to fix that.
+
+To switch on a schedule, add root cron entries (`sudo crontab -e`), e.g. menu during stand hours:
+
+```cron
+0 10 * * * /usr/local/bin/kiosk-switch menu
+0 20 * * * /usr/local/bin/kiosk-switch slideshow
+```
 
 ### Checking System Status
 

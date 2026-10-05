@@ -219,6 +219,11 @@ deploy_project() {
             error_exit "dist.tar extraction failed - no valid dist folder found"
         fi
 
+        # The digimenu installer uses the same /opt/dist.tar path; make sure this is the slideshow build
+        if [[ ! -d "$PROJECT_DIR/dist/slides" ]]; then
+            error_exit "dist.tar does not contain the slideshow (no dist/slides) - is it a leftover digimenu build?"
+        fi
+
         # Clone repository for configuration and script files (but skip building)
         log "Cloning repository for configuration and script files..."
         local temp_repo="/tmp/slideshow-repo"
@@ -341,8 +346,9 @@ server {
 }
 EOF
 
-    # Enable site
-    sudo rm -f /etc/nginx/sites-enabled/default
+    # Enable site. The digimenu site (if installed) also claims port 80 default_server,
+    # so disable it; it stays in sites-available for kiosk-switch.
+    sudo rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/menu-display
     sudo ln -sf /etc/nginx/sites-available/slideshow-display /etc/nginx/sites-enabled/
 
     # Test configuration
@@ -517,6 +523,14 @@ EOF
     sudo systemctl daemon-reload
     sudo systemctl enable slideshow-display.service
 
+    # This service runs the kiosk for both apps (see kiosk-switch). The digimenu's own
+    # kiosk service would fight it over Chromium and the display, so turn it off.
+    if systemctl cat menu-display.service &>/dev/null; then
+        log "Disabling digimenu kiosk service (use kiosk-switch to show the menu)"
+        sudo systemctl disable --now menu-display.service || true
+        sudo systemctl mask menu-display.service || true
+    fi
+
     log_success "Systemd service created and enabled"
 }
 
@@ -619,6 +633,9 @@ EOF
 
     sudo chmod +x /usr/local/bin/slideshow-update /usr/local/bin/slideshow-status
 
+    # Menu <-> slideshow switcher
+    sudo install -m 755 "$PROJECT_DIR/scripts/kiosk-switch.sh" /usr/local/bin/kiosk-switch
+
     log_success "Management scripts created"
 }
 
@@ -678,6 +695,7 @@ main() {
     echo "2. The slideshow will automatically start in kiosk mode"
     echo "3. Update the slideshow: slideshow-update"
     echo "4. Check status: slideshow-status"
+    echo "5. Switch between the menu and slideshow: kiosk-switch menu|slideshow|toggle|status"
     echo ""
     echo "🌐 The slideshow will be available at:"
     echo "  - http://localhost/ (on the Pi)"
