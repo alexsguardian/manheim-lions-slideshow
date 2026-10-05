@@ -69,10 +69,13 @@ switch_to() {
     fi
 
     # The menu's own kiosk service would fight ours over Chromium and the
-    # display, so keep it off (masked so menu-update can't restart it).
-    if systemctl cat "$MENU_SERVICE" &>/dev/null; then
+    # display, so keep it off. It's masked so menu-update can't restart it;
+    # mask can't replace a unit file in /etc, so remove that first.
+    if [[ -f "/etc/systemd/system/$MENU_SERVICE" ]]; then
         systemctl disable --now "$MENU_SERVICE" &>/dev/null || true
-        systemctl mask "$MENU_SERVICE" &>/dev/null || true
+        rm -f "/etc/systemd/system/$MENU_SERVICE"
+        systemctl daemon-reload
+        systemctl mask "$MENU_SERVICE"
     fi
 
     local previous

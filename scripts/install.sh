@@ -528,10 +528,13 @@ EOF
 
     # This service runs the kiosk for both apps (see kiosk-switch). The digimenu's own
     # kiosk service would fight it over Chromium and the display, so turn it off.
-    if systemctl cat menu-display.service &>/dev/null; then
+    # Masked so menu-update can't restart it; mask can't replace a unit file in /etc, so remove that first.
+    if [[ -f /etc/systemd/system/menu-display.service ]]; then
         log "Disabling digimenu kiosk service (use kiosk-switch to show the menu)"
         sudo systemctl disable --now menu-display.service || true
-        sudo systemctl mask menu-display.service || true
+        sudo rm -f /etc/systemd/system/menu-display.service
+        sudo systemctl daemon-reload
+        sudo systemctl mask menu-display.service
     fi
 
     log_success "Systemd service created and enabled"
