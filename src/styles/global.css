@@ -103,16 +103,6 @@ body {
   object-fit: contain;
 }
 
-/* Slow Ken Burns zoom on photos while the slide is up */
-.slide.is-active .fit-cover img {
-  animation: kenburns calc(var(--slide-duration) + var(--fade)) ease-out forwards;
-}
-
-@keyframes kenburns {
-  from { transform: scale(1); }
-  to { transform: scale(1.08); }
-}
-
 .fit-qr {
   background: #fff;
   border-color: var(--lions-gold);
@@ -295,7 +285,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .slide.is-active .fit-cover img,
   .pixel-shift {
     animation: none;
   }

@@ -76,7 +76,7 @@ import { slides, DEFAULT_DURATION } from '../data/slides'
 					dot.classList.remove('is-active')
 				})
 
-				// Restart the per-slide CSS animations (progress fill, Ken Burns) from zero
+				// Restart the per-slide CSS animations (progress fill) from zero
 				document.documentElement.style.setProperty('--slide-duration', `${seconds}s`)
 				void dots[next].offsetWidth
 				dots[next].classList.add('is-active')
