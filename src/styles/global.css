@@ -1,0 +1,302 @@
+/* Lions brand colors (from manheim-lions-website) */
+:root {
+  --lions-blue: #00338d;
+  --lions-blue-deep: #001a4d;
+  --lions-gold: #ebb700;
+  --text: #ffffff;
+  --text-muted: #c9d6f0;
+  --slide-duration: 12s;
+  --fade: 1.2s;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--text);
+  background: #000;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  cursor: none;
+}
+
+/* ---------- Frame ---------- */
+
+/* Locked to a 9:16 portrait frame (vertical TV). On a landscape screen it's
+   centered with bars on the sides, so laptop previews match the kiosk. */
+.frame {
+  height: 100dvh;
+  width: min(100vw, calc(100dvh * 9 / 16));
+  margin: 0 auto;
+  container-type: size;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: radial-gradient(ellipse at 50% 0%, var(--lions-blue) 0%, var(--lions-blue-deep) 75%);
+}
+
+.header {
+  text-align: center;
+  padding: 2cqmin 4cqmin 0;
+}
+
+.ribbon {
+  height: 11cqmin;
+  width: auto;
+}
+
+.stage {
+  position: relative;
+  margin: 2cqmin 4cqmin;
+}
+
+/* ---------- Slides ---------- */
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3.5cqmin;
+  opacity: 0;
+  transition: opacity var(--fade) ease-in-out;
+}
+
+.slide.is-active {
+  opacity: 1;
+}
+
+.media {
+  flex: 0 0 52%;
+  min-height: 0;
+  border-radius: 2.5cqmin;
+  border: 0.6cqmin solid var(--lions-gold);
+  overflow: hidden;
+  box-shadow: 0 2cqmin 5cqmin rgb(0 0 0 / 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.media img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.fit-cover img {
+  object-fit: cover;
+}
+
+.fit-contain {
+  background: #fff;
+  padding: 2.5cqmin;
+}
+
+.fit-contain img {
+  object-fit: contain;
+}
+
+/* Slow Ken Burns zoom on photos while the slide is up */
+.slide.is-active .fit-cover img {
+  animation: kenburns calc(var(--slide-duration) + var(--fade)) ease-out forwards;
+}
+
+@keyframes kenburns {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+.fit-qr {
+  background: #fff;
+  border-color: var(--lions-gold);
+}
+
+.qr {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3cqmin;
+  color: #000;
+}
+
+.qr img {
+  width: auto;
+  height: 80%;
+  aspect-ratio: 1;
+}
+
+.qr p {
+  margin: 1cqmin 0 0;
+  font-size: 4cqmin;
+  font-weight: 800;
+}
+
+.copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 0 2cqmin;
+}
+
+.kicker,
+.title,
+.body {
+  opacity: 0;
+  transform: translateY(3cqmin);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.slide.is-active .kicker,
+.slide.is-active .title,
+.slide.is-active .body {
+  opacity: 1;
+  transform: none;
+}
+
+.slide.is-active .kicker { transition-delay: 0.4s; }
+.slide.is-active .title { transition-delay: 0.6s; }
+.slide.is-active .body { transition-delay: 0.8s; }
+
+.kicker {
+  margin: 0;
+  color: var(--lions-gold);
+  font-size: 3.2cqmin;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.title {
+  margin: 1cqmin 0 0;
+  font-size: 7.5cqmin;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.title::after {
+  content: '';
+  display: block;
+  width: 18cqmin;
+  height: 0.8cqmin;
+  margin: 2.5cqmin auto;
+  border-radius: 1cqmin;
+  background: var(--lions-gold);
+}
+
+.body {
+  margin: 0 auto;
+  max-width: 34ch;
+  font-size: 4cqmin;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4cqmin;
+  padding: 2cqmin 4cqmin 3cqmin;
+  background: rgb(0 0 0 / 0.25);
+  border-top: 0.4cqmin solid var(--lions-gold);
+}
+
+.dots {
+  flex: 1;
+  display: flex;
+  gap: 1cqmin;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dot {
+  flex: 1;
+  height: 0.8cqmin;
+  border-radius: 1cqmin;
+  background: rgb(255 255 255 / 0.2);
+  overflow: hidden;
+}
+
+.dot span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--lions-gold);
+}
+
+.dot.is-done span {
+  width: 100%;
+}
+
+.dot.is-active span {
+  animation: fill var(--slide-duration) linear forwards;
+}
+
+@keyframes fill {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.footer-qr {
+  display: flex;
+  align-items: center;
+  gap: 2cqmin;
+}
+
+.footer-qr img {
+  width: 10cqmin;
+  height: 10cqmin;
+  padding: 0.6cqmin;
+  background: #fff;
+  border-radius: 1cqmin;
+}
+
+.footer-qr p {
+  margin: 0;
+}
+
+.footer-lead {
+  font-size: 2.4cqmin;
+  font-weight: 700;
+}
+
+.footer-url {
+  font-size: 2.2cqmin;
+  color: var(--lions-gold);
+}
+
+/* ---------- Anti burn-in (same approach as digimenu) ---------- */
+
+@keyframes pixelShift {
+  0% { transform: translate(0px, 0px); }
+  25% { transform: translate(2px, 1px); }
+  50% { transform: translate(1px, 2px); }
+  75% { transform: translate(-1px, 1px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+.pixel-shift {
+  animation: pixelShift 900s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide.is-active .fit-cover img,
+  .pixel-shift {
+    animation: none;
+  }
+}

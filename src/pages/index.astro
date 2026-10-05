@@ -1,0 +1,106 @@
+---
+import '../styles/global.css'
+import { slides, DEFAULT_DURATION } from '../data/slides'
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/png" href="./CentennialLogo.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Manheim Lions Slideshow</title>
+	</head>
+	<body>
+		<div class="frame pixel-shift">
+			<header class="header">
+				<img src="./CentennialRibbon.png" alt="Manheim Lions Club Centennial Ribbon" class="ribbon" />
+			</header>
+
+			<main class="stage" aria-live="polite">
+				{slides.map((slide, i) => (
+					<section
+						class:list={['slide', { 'is-active': i === 0 }]}
+						data-duration={slide.duration ?? DEFAULT_DURATION}
+						aria-hidden={i === 0 ? 'false' : 'true'}
+					>
+						<div class:list={['media', slide.image ? `fit-${slide.fit ?? 'cover'}` : 'fit-qr']}>
+							{slide.image ? (
+								<img src={slide.image} alt={slide.imageAlt ?? ''} />
+							) : (
+								<div class="qr">
+									<img src="./qr-code.png" alt="QR code to manheimlions.org" />
+									<p>manheimlions.org</p>
+								</div>
+							)}
+						</div>
+						<div class="copy">
+							<p class="kicker">{slide.kicker}</p>
+							<h2 class="title">{slide.title}</h2>
+							<p class="body">{slide.body}</p>
+						</div>
+					</section>
+				))}
+			</main>
+
+			<footer class="footer">
+				<ol class="dots" aria-hidden="true">
+					{slides.map((_, i) => <li class:list={['dot', { 'is-active': i === 0 }]}><span></span></li>)}
+				</ol>
+				<div class="footer-qr">
+					<img src="./qr-code.png" alt="" />
+					<div>
+						<p class="footer-lead">Learn more about us!</p>
+						<p class="footer-url">manheimlions.org</p>
+					</div>
+				</div>
+			</footer>
+		</div>
+
+		<script>
+			const slides = Array.from(document.querySelectorAll<HTMLElement>('.slide'))
+			const dots = Array.from(document.querySelectorAll<HTMLElement>('.dot'))
+			let current = 0
+			let timer: number | undefined
+
+			function show(index: number) {
+				const next = (index + slides.length) % slides.length
+				const seconds = Number(slides[next].dataset.duration) || 12
+
+				slides.forEach((slide, i) => {
+					slide.classList.toggle('is-active', i === next)
+					slide.setAttribute('aria-hidden', String(i !== next))
+				})
+				dots.forEach((dot, i) => {
+					dot.classList.toggle('is-done', i < next)
+					dot.classList.remove('is-active')
+				})
+
+				// Restart the per-slide CSS animations (progress fill, Ken Burns) from zero
+				document.documentElement.style.setProperty('--slide-duration', `${seconds}s`)
+				void dots[next].offsetWidth
+				dots[next].classList.add('is-active')
+
+				current = next
+				clearTimeout(timer)
+				timer = window.setTimeout(() => show(current + 1), seconds * 1000)
+			}
+
+			// Arrow keys / click for testing on a laptop; the kiosk just auto-advances
+			document.addEventListener('keydown', (e) => {
+				if (e.key === 'ArrowRight' || e.key === ' ') show(current + 1)
+				if (e.key === 'ArrowLeft') show(current - 1)
+			})
+			document.addEventListener('click', () => show(current + 1))
+
+			document.addEventListener('visibilitychange', () => {
+				if (document.hidden) clearTimeout(timer)
+				else show(current)
+			})
+
+			// ?slide=N (1-based) jumps straight to a slide for previewing
+			const start = Number(new URLSearchParams(location.search).get('slide')) || 1
+			show(start - 1)
+		</script>
+	</body>
+</html>
